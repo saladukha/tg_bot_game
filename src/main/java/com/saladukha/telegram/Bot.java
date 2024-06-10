@@ -1,10 +1,11 @@
 package com.saladukha.telegram;
 
-import lombok.SneakyThrows;
+import com.saladukha.telegram.command.BotCommandHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 /**
@@ -18,11 +19,18 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 public class Bot extends TelegramLongPollingBot {
 
     private final String username;
+    private final BotCommandHandler commandHandler;
 
-    @SneakyThrows
     @Override
     public void onUpdateReceived(Update update) {
-
+        if (update.hasMessage()) {
+            Message message = update.getMessage();
+            String text = message.getText();
+            if (text == null) return;
+            if (text.startsWith("/")) {
+                commandHandler.handleCommand(message);
+            }
+        }
     }
 
     @Override
@@ -31,8 +39,10 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     public Bot(@Value("${app.telegram.username}") String username,
-               @Value("${app.telegram.token}") String botToken) {
+               @Value("${app.telegram.token}") String botToken,
+               BotCommandHandler commandHandler) {
         super(botToken);
         this.username = username;
+        this.commandHandler = commandHandler;
     }
 }
