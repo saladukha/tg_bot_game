@@ -1,4 +1,10 @@
 app:
   telegram:
-    username: MyFirstTestJavaBot
-    token:
+    username: ${env.variable.telegram.username}
+    token: ${env.variable.telegram.token}
+
+spring:
+  datasource:
+    url: ${env.variable.db.url}
+    username: ${env.variable.db.username}
+    password: ${env.variable.db.password}
