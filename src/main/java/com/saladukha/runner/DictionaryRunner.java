@@ -4,6 +4,7 @@ import com.saladukha.entity.Word;
 import com.saladukha.service.WordService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Order;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.io.ClassPathResource;
@@ -21,6 +22,7 @@ import java.io.InputStreamReader;
  */
 
 @Slf4j
+@Order(1)
 @Component
 @RequiredArgsConstructor
 public class DictionaryRunner implements ApplicationRunner {

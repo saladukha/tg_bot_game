@@ -5,6 +5,10 @@ import com.saladukha.repository.WordRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
+import java.util.List;
+import java.util.stream.Stream;
+
 /**
  * Created by: Yauhen Saladukha
  * email: yauhensaladukha@gmail.com
@@ -12,6 +16,7 @@ import org.springframework.stereotype.Service;
  */
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class WordService {
 
@@ -35,5 +40,21 @@ public class WordService {
         var entity = new Word();
         entity.setWord(word);
         return entity;
+    }
+
+    public List<String> getAllWordForm(String word) {
+        return getOrCreate(word).stream()
+                .map(w -> w.getInitWord() == null ? w : w.getInitWord())
+                .flatMap(w -> Stream.concat(Stream.of(w), w.getForms().stream()))
+                .map(Word::getWord)
+                .toList();
+    }
+
+    public List<Word> getOrCreate(String word) {
+        List<Word> wordsList = wordRepository.findByWord(word);
+        if (wordsList.isEmpty()) {
+            return List.of(save(word));
+        }
+        return wordsList;
     }
 }
