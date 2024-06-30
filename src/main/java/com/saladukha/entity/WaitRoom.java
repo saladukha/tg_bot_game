@@ -28,7 +28,7 @@ public class WaitRoom {
     private String hash;
 
     @Enumerated(EnumType.STRING)
-    private WaitRoomStatus status;
+    private WaitRoomStatus status = WaitRoomStatus.AWAITING;
 
     @ManyToOne
     private Chat chat;

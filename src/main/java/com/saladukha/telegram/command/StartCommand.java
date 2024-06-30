@@ -1,7 +1,9 @@
 package com.saladukha.telegram.command;
 
 import com.saladukha.entity.User;
+import com.saladukha.entity.WaitRoom;
 import com.saladukha.service.UserService;
+import com.saladukha.service.WaitRoomService;
 import com.saladukha.telegram.message.MessageBuilder;
 import com.saladukha.telegram.message.MessageSender;
 import lombok.RequiredArgsConstructor;
@@ -27,17 +29,28 @@ public class StartCommand implements BotCommand {
 
     private final UserService userService;
 
+    private final WaitRoomService waitRoomService;
+
     @Override
     public void handle(Message message) {
+        Long chatId = message.getChatId();
         User user = convert(message.getFrom());
         user = userService.save(user);
-        SendMessage response = messageBuilder.buildWelcomeMsg(message.getChatId(), user);
-        messageSender.sendMessage(response);
+        String hash = extractHash(message.getText());
+        if (hash != null) {
+            WaitRoom waitRoom = waitRoomService.join(hash, message.getFrom().getId());
+            String txt = "You've joined the game in the <b>%s</b> group".formatted(waitRoom.getChat().getTitle());
+            SendMessage joinMessage = messageBuilder.buildTextMsg(chatId, txt);
+            messageSender.sendMessage(joinMessage);
+        } else {
+            SendMessage response = messageBuilder.buildWelcomeMsg(message.getChatId(), user);
+            messageSender.sendMessage(response);
+        }
     }
 
     @Override
     public boolean isMatch(String command) {
-        return START_COMMAND.equals(command);
+        return command.startsWith(START_COMMAND);
     }
 
     private User convert(org.telegram.telegrambots.meta.api.objects.User tgUser) {
@@ -47,5 +60,13 @@ public class StartCommand implements BotCommand {
         user.setUsername(tgUser.getUserName());
         user.setTelegramId(tgUser.getId());
         return user;
+    }
+
+    private String extractHash(String text) {
+        String[] split = text.split(" ");
+        if (split.length > 1) {
+            return split[1];
+        }
+        return null;
     }
 }
