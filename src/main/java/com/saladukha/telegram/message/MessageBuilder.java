@@ -1,7 +1,9 @@
 package com.saladukha.telegram.message;
 
 import com.saladukha.entity.User;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
@@ -14,19 +16,23 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 @Component
 public class MessageBuilder {
 
+    @Value("${app.telegram.username}")
+    private String username;
+
     public SendMessage buildWelcomeMsg(Long chatId, User user) {
         SendMessage message = new SendMessage();
         String txt = """
         Welcome %s! \uD83D\uDC4B
         This bot lets you play 🎮 the Taboo game with your friends.
         Here's how:
-        1. Add this bot to a chat with other players.
+        1. <a href="https://t.me/%s?startgroup">Add this bot</a> to a chat with other players.
         2. In that chat, send the /play command to start a new game.
         
         Use the /rules command to view the game rules
-        """.formatted(user.getFirstName());
+        """.formatted(user.getFirstName(), username);
         message.setText(txt);
         message.setChatId(chatId);
+        message.setParseMode(ParseMode.HTML);
         return message;
     }
 
@@ -47,7 +53,7 @@ public class MessageBuilder {
                 
                 If any of the Guessers correctly guess a word, both the Explainer and Guesser earn a score\uD83C\uDFAF
                 
-                The Explainer role changes every five minutes ⌛, and the game continues until everyone has taken a turn explaining.      
+                The Explainer role changes every five minutes ⌛, and the game continues until everyone has taken a turn explaining.     
                 """;
         message.setText(txt);
         message.setChatId(chatId);
